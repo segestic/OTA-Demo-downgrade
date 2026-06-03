@@ -219,7 +219,7 @@ public:
 
   <script>
     const CURRENT_VERSION = "%VERSION%"; 
-    const JSON_URL = "https://raw.githubusercontent.com/segestic/OTA-Demo/main/manifest.json";
+    const JSON_URL = "https://raw.githubusercontent.com/segestic/OTA-Demo-downgrade/main/manifest.json";
 
     const ringEl = document.getElementById("status-ring");
     const iconEl = document.getElementById("status-icon");
