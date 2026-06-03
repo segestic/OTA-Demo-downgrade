@@ -1,0 +1,100 @@
+name: OTA Firmware CI/CD
+
+on:
+  # 1. Triggers a test build on every normal push to main
+  push:
+    branches:
+      - main
+  # 2. Triggers the full OTA Release process when you push a tag
+    tags:
+      - 'v*.*.*' 
+
+permissions:
+  contents: write # Required to create releases and commit the JSON
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install PlatformIO
+        run: |
+          python -m pip install --upgrade pip
+          pip install platformio
+
+      - name: Build Firmware
+        env:
+          # Pulls your GitHub Secrets into the build environment
+          SECRET_WIFI_SSID: ${{ secrets.SECRET_WIFI_SSID }}
+          SECRET_WIFI_PASS: ${{ secrets.SECRET_WIFI_PASS }}
+        run: pio run -e esp32dev 
+
+      # For normal pushes, we just save a generic test binary
+      - name: Rename and Extract Firmware (Test)
+        if: "!startsWith(github.ref, 'refs/tags/v')"
+        run: cp .pio/build/esp32dev/firmware.bin firmware_test.bin
+
+      # For releases, we inject the actual version number into the filename!
+      - name: Rename and Extract Firmware (Release)
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+          cp .pio/build/esp32dev/firmware.bin firmware_${VERSION}.bin
+
+      - name: Upload Firmware Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: esp32-firmware
+          # Uploads whatever .bin files were created
+          path: firmware_*.bin 
+          retention-days: 5
+
+      # =========================================================
+      # ⚠️ THE STEPS BELOW ONLY RUN IF YOU PUSHED A 'v' TAG
+      # =========================================================
+      
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: firmware_*.bin # Grabs the uniquely named binary
+          generate_release_notes: true
+
+      - name: Update manifest.json
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          git checkout main
+          VERSION=${GITHUB_REF_NAME#v}
+          BIN_URL="https://raw.githubusercontent.com/${{ github.repository }}/main/firmware_${VERSION}.bin"
+          TARGET_CONFIG="target_v${VERSION}"
+          
+          echo "Appending new version to JSON: $VERSION"
+          echo "New URL: $BIN_URL"
+          
+          # CRITICAL CHANGE: This jq command now APPENDS a new block to the top of the array
+          jq -c --arg ver "$VERSION" --arg url "$BIN_URL" --arg conf "$TARGET_CONFIG" \
+              '.Configurations = [{"Board": "ESP32_DEV", "Config": $conf, "Version": $ver, "URL": $url}] + .Configurations' \
+              manifest.json > tmp.json && mv tmp.json manifest.json
+              
+      - name: Commit and Push Updated JSON and Binary
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          
+          git add manifest.json
+          # Force add the uniquely named binary to the repo
+          git add -f firmware_${VERSION}.bin 
+          
+          git commit -m "chore: release version ${{ github.ref_name }} [skip ci]"
+          git push origin main
