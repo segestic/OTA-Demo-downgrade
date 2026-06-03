@@ -169,7 +169,7 @@ static size_t bleTotalBytes = 0;
 class OtaCtrlCallbacks : public BLECharacteristicCallbacks {
     void onWrite(BLECharacteristic* pChar) override {
         // Core v3: getValue() returns an Arduino String directly
-        String data = pChar->getValue(); 
+        String data = pChar->getValue().c_str();
         
         if (data.startsWith("START:")) {
             int fileSize = data.substring(6).toInt();

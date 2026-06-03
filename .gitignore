@@ -1,0 +1,22 @@
+# PlatformIO Build & Cache
+.pio/
+.pioenvs/
+.piolibdeps/
+.pio/build/
+.pio/libdeps/
+
+# Eclipse/VS Code/CLion IDE Project files
+.classpath
+.project
+.settings/
+.cproject
+.vscode/
+.idea/
+*.launch
+*.pyc
+
+# Local Environment & Secrets
+.env
+.DS_Store
+Thumbs.db
+
