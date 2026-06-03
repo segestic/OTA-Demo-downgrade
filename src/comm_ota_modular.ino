@@ -15,7 +15,7 @@
 #if TRIGGER_MODE == 'W' // MUST BE W
 
 #include "CaptiveManager.h"
-#define JSON_URL "https://raw.githubusercontent.com/segestic/OTA-Demo/main/manifest.json"
+#define JSON_URL "https://raw.githubusercontent.com/segestic/OTA-Demo-downgrade/main/manifest.json"
 
 CaptiveManager captivePortal;
 bool triggerOtaCheck = false; // Global flag requested by the Captive Dashboard

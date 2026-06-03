@@ -70,13 +70,13 @@ The automated pipeline manages a `manifest.json` file that looks like this, usin
       "Board": "ESP32_DEV",
       "Config": "target_v1.0.8",
       "Version": "1.0.8",
-      "URL": "https://raw.githubusercontent.com/segestic/OTA-Demo/main/firmware_1.0.8.bin"
+      "URL": "https://raw.githubusercontent.com/segestic/OTA-Demo-downgrade/main/firmware_1.0.8.bin"
     },
     {
       "Board": "ESP32_DEV",
       "Config": "target_v1.0.0",
       "Version": "1.0.0",
-      "URL": "https://raw.githubusercontent.com/segestic/OTA-Demo/main/firmware_1.0.0.bin"
+      "URL": "https://raw.githubusercontent.com/segestic/OTA-Demo-downgrade/main/firmware_1.0.0.bin"
     }
   ]
 }
