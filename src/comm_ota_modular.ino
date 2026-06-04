@@ -2,7 +2,7 @@
 #include "CommercialOTA.h"
 #include "esp_task_wdt.h" 
 
-#define CURRENT_VERSION "1.0.0"
+#define CURRENT_VERSION "1.0.1"
 
 // ============================================================
 // MASTER COMPILE FLAG: 'W' for Wi-Fi PULL, 'B' for BLE PUSH
